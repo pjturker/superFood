@@ -1,0 +1,197 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>营养摄入监测</title>
+    <link rel="stylesheet" href="styles.css">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0-beta3/css/all.min.css">
+</head>
+<body>
+    <header>
+        <h1>营养摄入监测</h1>
+    </header>
+    
+    <main>
+        <div class="tabs">
+            <div class="tab active" data-tab="today">今日摄入</div>
+            <div class="tab" data-tab="history">历史数据</div>
+        </div>
+
+        <div id="today-tab" class="tab-content active">
+            <div class="date-display" id="current-date"></div>
+            
+            <div class="card">
+                <h2 class="section-title">营养素摄入数据</h2>
+                <div class="input-container">
+                    <div class="input-group">
+                        <div class="nutrient-tag" style="background: #4CAF50;">碳水</div>
+                        <div class="input-row">
+                            <label>目标值</label>
+                            <input type="number" id="carb-target" value="250" min="0" placeholder="目标值">
+                        </div>
+                        <div class="meal-inputs">
+                            <div>
+                                <div class="meal-label">早餐</div>
+                                <input type="number" id="carb-breakfast" value="60" min="0" placeholder="早餐">
+                            </div>
+                            <div>
+                                <div class="meal-label">午餐</div>
+                                <input type="number" id="carb-lunch" value="90" min="0" placeholder="午餐">
+                            </div>
+                            <div>
+                                <div class="meal-label">晚餐</div>
+                                <input type="number" id="carb-dinner" value="70" min="0" placeholder="晚餐">
+                            </div>
+                        </div>
+                    </div>
+                    <div class="input-group">
+                        <div class="nutrient-tag" style="background: #2196F3;">蛋白质</div>
+                        <div class="input-row">
+                            <label>目标值</label>
+                            <input type="number" id="protein-target" value="120" min="0" placeholder="目标值">
+                        </div>
+                        <div class="meal-inputs">
+                            <div>
+                                <div class="meal-label">早餐</div>
+                                <input type="number" id="protein-breakfast" value="30" min="0" placeholder="早餐">
+                            </div>
+                            <div>
+                                <div class="meal-label">午餐</div>
+                                <input type="number" id="protein-lunch" value="45" min="0" placeholder="午餐">
+                            </div>
+                            <div>
+                                <div class="meal-label">晚餐</div>
+                                <input type="number" id="protein-dinner" value="40" min="0" placeholder="晚餐">
+                            </div>
+                        </div>
+                    </div>
+                    <div class="input-group">
+                        <div class="nutrient-tag" style="background: #F44336;">脂肪</div>
+                        <div class="input-row">
+                            <label>目标值</label>
+                            <input type="number" id="fat-target" value="70" min="0" placeholder="目标值">
+                        </div>
+                        <div class="meal-inputs">
+                            <div>
+                                <div class="meal-label">早餐</div>
+                                <input type="number" id="fat-breakfast" value="15" min="0" placeholder="早餐">
+                            </div>
+                            <div>
+                                <div class="meal-label">午餐</div>
+                                <input type="number" id="fat-lunch" value="25" min="0" placeholder="午餐">
+                            </div>
+                            <div>
+                                <div class="meal-label">晚餐</div>
+                                <input type="number" id="fat-dinner" value="20" min="0" placeholder="晚餐">
+                            </div>
+                        </div>
+                    </div>
+                    <div class="input-group">
+                        <div class="nutrient-tag" style="background: #009688;">水分</div>
+                        <div class="input-row">
+                            <label>目标值</label>
+                            <input type="number" id="water-target" value="2000" min="0" placeholder="目标值">
+                        </div>
+                        <div class="meal-inputs">
+                            <div>
+                                <div class="meal-label">早餐</div>
+                                <input type="number" id="water-breakfast" value="500" min="0" placeholder="早餐">
+                            </div>
+                            <div>
+                                <div class="meal-label">午餐</div>
+                                <input type="number" id="water-lunch" value="700" min="0" placeholder="午餐">
+                            </div>
+                            <div>
+                                <div class="meal-label">晚餐</div>
+                                <input type="number" id="water-dinner" value="500" min="0" placeholder="晚餐">
+                            </div>
+                        </div>
+                    </div>
+                </div>
+                <div class="chart-controls" style="margin-top: 1.5rem;">
+                    <button id="save-data" class="animation-button save-btn">
+                        <i class="fas fa-save"></i> 保存今日数据
+                    </button>
+                    <button id="export-data" class="animation-button" style="background-color: #FF9800;">
+                        <i class="fas fa-file-export"></i> 导出数据
+                    </button>
+                    <button id="import-data" class="animation-button" style="background-color: #9C27B0;">
+                        <i class="fas fa-file-import"></i> 导入数据
+                    </button>
+                    <input type="file" id="import-file" accept=".json" style="display: none;">
+                </div>
+            </div>
+            
+            <div class="card">
+                <h2 class="section-title">营养摄入可视化</h2>
+                
+                <div class="chart-controls">
+                    <button id="play-all" class="animation-button all-btn">
+                        <i class="fas fa-play"></i> 全部播放
+                    </button>
+                    <button id="play-breakfast" class="animation-button breakfast-btn">
+                        <i class="fas fa-mug-hot"></i> 早餐播放
+                    </button>
+                    <button id="play-lunch" class="animation-button lunch-btn">
+                        <i class="fas fa-utensils"></i> 午餐播放
+                    </button>
+                    <button id="play-dinner" class="animation-button dinner-btn">
+                        <i class="fas fa-moon"></i> 晚餐播放
+                    </button>
+                </div>
+                
+                <div class="chart-grid">
+                    <div class="chart-container">
+                        <div class="chart-title">碳水摄入比例 (g)</div>
+                        <canvas id="carb-chart"></canvas>
+                    </div>
+                    <div class="chart-container">
+                        <div class="chart-title">蛋白质摄入比例 (g)</div>
+                        <canvas id="protein-chart"></canvas>
+                    </div>
+                    <div class="chart-container">
+                        <div class="chart-title">脂肪摄入比例 (g)</div>
+                        <canvas id="fat-chart"></canvas>
+                    </div>
+                    <div class="chart-container">
+                        <div class="chart-title">水分摄入比例 (ml)</div>
+                        <canvas id="water-chart"></canvas>
+                    </div>
+                </div>
+            </div>
+        </div>
+        
+        <div id="history-tab" class="tab-content">
+            <div class="card">
+                <h2 class="section-title">历史摄入数据</h2>
+                
+                <div class="period-selector">
+                    <button class="period-btn active" data-period="7">最近7天</button>
+                    <button class="period-btn" data-period="14">最近14天</button>
+                    <button class="period-btn" data-period="30">最近30天</button>
+                </div>
+                
+                <div class="history-chart-container">
+                    <canvas id="carb-history-chart"></canvas>
+                </div>
+                
+                <div class="history-chart-container">
+                    <canvas id="protein-history-chart"></canvas>
+                </div>
+                
+                <div class="history-chart-container">
+                    <canvas id="fat-history-chart"></canvas>
+                </div>
+                
+                <div class="history-chart-container">
+                    <canvas id="water-history-chart"></canvas>
+                </div>
+            </div>
+        </div>
+    </main>
+
+    <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+    <script src="script.js"></script>
+</body>
+</html> 
