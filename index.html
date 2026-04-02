@@ -21,6 +21,37 @@
         <div id="today-tab" class="tab-content active">
             <div class="date-display" id="current-date"></div>
             
+            <div class="card summary-card">
+                <h2 class="section-title">今日摄入概览</h2>
+                <div class="summary-grid">
+                    <div class="summary-item">
+                        <div class="summary-label">总热量</div>
+                        <div class="summary-value" id="summary-calories">0 kcal</div>
+                        <div class="summary-sub" id="summary-calories-target"></div>
+                    </div>
+                    <div class="summary-item" id="summary-carb">
+                        <div class="summary-label">碳水完成率</div>
+                        <div class="progress-bar-wrap"><div class="progress-bar" id="progress-carb"></div></div>
+                        <div class="summary-sub" id="progress-carb-label"></div>
+                    </div>
+                    <div class="summary-item" id="summary-protein">
+                        <div class="summary-label">蛋白质完成率</div>
+                        <div class="progress-bar-wrap"><div class="progress-bar" id="progress-protein"></div></div>
+                        <div class="summary-sub" id="progress-protein-label"></div>
+                    </div>
+                    <div class="summary-item" id="summary-fat">
+                        <div class="summary-label">脂肪完成率</div>
+                        <div class="progress-bar-wrap"><div class="progress-bar" id="progress-fat"></div></div>
+                        <div class="summary-sub" id="progress-fat-label"></div>
+                    </div>
+                    <div class="summary-item" id="summary-water">
+                        <div class="summary-label">水分完成率</div>
+                        <div class="progress-bar-wrap"><div class="progress-bar" id="progress-water"></div></div>
+                        <div class="summary-sub" id="progress-water-label"></div>
+                    </div>
+                </div>
+            </div>
+
             <div class="card">
                 <h2 class="section-title">营养素摄入数据</h2>
                 <div class="input-container">
