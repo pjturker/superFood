@@ -1,3 +1,8 @@
+// 工具函数：获取今日日期字符串（YYYY-MM-DD）
+function getTodayString() {
+    return new Date().toISOString().split('T')[0];
+}
+
 // 显示当前日期
 const today = new Date();
 document.getElementById('current-date').textContent = today.toLocaleDateString('zh-CN', {
@@ -62,6 +67,9 @@ const nutrients = [
         unit: 'ml'
     }
 ];
+
+// 存储当前动画帧 ID，用于取消正在运行的动画
+let currentAnimationId = null;
 
 // 创建今日图表
 const charts = nutrients.map(n => {
@@ -249,6 +257,50 @@ const historyCharts = nutrients.map(n => {
     });
 });
 
+// 卡路里系数（每克对应 kcal）
+const CALORIE_FACTORS = { '碳水': 4, '蛋白质': 4, '脂肪': 9, '水分': 0 };
+
+// 进度条对应的 DOM ID 映射
+const PROGRESS_IDS = { '碳水': 'carb', '蛋白质': 'protein', '脂肪': 'fat', '水分': 'water' };
+
+// 更新概览摘要（热量 + 进度条）
+function updateSummary() {
+    let totalCalories = 0;
+    let targetCalories = 0;
+
+    nutrients.forEach(n => {
+        const target = parseFloat(document.getElementById(n.targetId).value) || 0;
+        const breakfast = parseFloat(document.getElementById(n.mealIds.breakfast).value) || 0;
+        const lunch = parseFloat(document.getElementById(n.mealIds.lunch).value) || 0;
+        const dinner = parseFloat(document.getElementById(n.mealIds.dinner).value) || 0;
+        const total = breakfast + lunch + dinner;
+        const factor = CALORIE_FACTORS[n.name] || 0;
+
+        totalCalories += total * factor;
+        targetCalories += target * factor;
+
+        // 更新进度条
+        const pid = PROGRESS_IDS[n.name];
+        if (!pid) return;
+        const pct = target > 0 ? Math.min((total / target) * 100, 150) : 0;
+        const displayPct = Math.min(pct, 100);
+        const bar = document.getElementById(`progress-${pid}`);
+        const label = document.getElementById(`progress-${pid}-label`);
+        bar.style.width = `${displayPct}%`;
+        if (pct > 100) {
+            bar.classList.add('over-target');
+        } else {
+            bar.classList.remove('over-target');
+        }
+        const realPct = target > 0 ? Math.round((total / target) * 100) : 0;
+        label.textContent = `${total} / ${target} ${n.unit}（${realPct}%）`;
+    });
+
+    document.getElementById('summary-calories').textContent = `${Math.round(totalCalories)} kcal`;
+    document.getElementById('summary-calories-target').textContent =
+        targetCalories > 0 ? `目标 ${Math.round(targetCalories)} kcal` : '';
+}
+
 // 更新今日图表函数
 function updateCharts() {
     nutrients.forEach((n, index) => {
@@ -256,16 +308,16 @@ function updateCharts() {
         const breakfast = parseFloat(document.getElementById(n.mealIds.breakfast).value) || 0;
         const lunch = parseFloat(document.getElementById(n.mealIds.lunch).value) || 0;
         const dinner = parseFloat(document.getElementById(n.mealIds.dinner).value) || 0;
-        
-        // 更新图表数据
+
         charts[index].data.datasets[0].data = [target];
         charts[index].data.datasets[1].data = [breakfast];
         charts[index].data.datasets[2].data = [lunch];
         charts[index].data.datasets[3].data = [dinner];
-        
-        // 更新图表
+
         charts[index].update();
     });
+
+    updateSummary();
 }
 
 // 设置按钮状态
@@ -300,39 +352,44 @@ function resetCharts(keepBreakfast = false, keepLunch = false, keepDinner = fals
 
 // 创建单个餐饮动画函数
 function animateMeal(mealIndex, onComplete) {
+    // 取消上一个未完成的动画
+    if (currentAnimationId !== null) {
+        cancelAnimationFrame(currentAnimationId);
+        currentAnimationId = null;
+    }
+
     // 获取当前餐饮对应的数值
-    const nutrientValues = nutrients.map((n, index) => {
+    const nutrientValues = nutrients.map((n) => {
         return {
             breakfast: parseFloat(document.getElementById(n.mealIds.breakfast).value) || 0,
             lunch: parseFloat(document.getElementById(n.mealIds.lunch).value) || 0,
             dinner: parseFloat(document.getElementById(n.mealIds.dinner).value) || 0,
         };
     });
-    
+
     const totalFrames = 60;
     let currentFrame = 0;
-    
+
     // 基于mealIndex确定要动画的餐饮 (1=早餐, 2=午餐, 3=晚餐)
     const mealType = mealIndex === 1 ? 'breakfast' : mealIndex === 2 ? 'lunch' : 'dinner';
-    
+
     const animate = () => {
         if (currentFrame <= totalFrames) {
             const progress = currentFrame / totalFrames;
-            
+
             nutrients.forEach((n, index) => {
-                // 更新相应的数据集
                 charts[index].data.datasets[mealIndex].data = [nutrientValues[index][mealType] * progress];
                 charts[index].update();
             });
-            
+
             currentFrame++;
-            requestAnimationFrame(animate);
+            currentAnimationId = requestAnimationFrame(animate);
         } else {
-            // 动画完成
+            currentAnimationId = null;
             if (onComplete) onComplete();
         }
     };
-    
+
     animate();
 }
 
@@ -406,7 +463,7 @@ function playAllAnimation() {
 // 本地存储功能 
 // 检查是否有保存的数据
 function checkAndLoadTodayData() {
-    const dateString = new Date().toISOString().split('T')[0]; // 2023-05-25 格式
+    const dateString = getTodayString();
     const todayData = localStorage.getItem(`nutrition-data-${dateString}`);
     
     if (todayData) {
@@ -433,11 +490,11 @@ function saveNutritionData() {
     button.innerHTML = '<i class="fas fa-spinner fa-spin"></i> 保存中...';
     button.disabled = true;
     
-    const dateString = new Date().toISOString().split('T')[0]; // 2023-05-25 格式
-    
+    const dateString = getTodayString();
+
     // 准备数据对象
     const data = {};
-    
+
     nutrients.forEach(n => {
         data[n.name] = {
             target: parseFloat(document.getElementById(n.targetId).value) || 0,
@@ -446,9 +503,18 @@ function saveNutritionData() {
             dinner: parseFloat(document.getElementById(n.mealIds.dinner).value) || 0
         };
     });
-    
+
     // 保存到localStorage
-    localStorage.setItem(`nutrition-data-${dateString}`, JSON.stringify(data));
+    try {
+        localStorage.setItem(`nutrition-data-${dateString}`, JSON.stringify(data));
+    } catch (e) {
+        setTimeout(() => {
+            button.innerHTML = '<i class="fas fa-save"></i> 保存今日数据';
+            button.disabled = false;
+        }, 0);
+        alert('存储空间不足，请先导出旧数据后再保存');
+        return;
+    }
     
     // 模拟保存延迟，给用户反馈
     setTimeout(() => {
@@ -485,7 +551,7 @@ function loadHistoryData(days = 7) {
     for (let i = days - 1; i >= 0; i--) {
         const date = new Date(today);
         date.setDate(date.getDate() - i);
-        const dateString = date.toISOString().split('T')[0];
+        const dateString = date.toISOString().split('T')[0]; // 保留原格式，非今日无需 getTodayString
         
         // 添加日期标签（只保留月和日）
         dates.push(date.toLocaleDateString('zh-CN', { month: 'numeric', day: 'numeric' }));
@@ -612,8 +678,7 @@ function exportNutritionData() {
     const url = URL.createObjectURL(dataBlob);
     
     // 创建一个日期字符串用于文件名
-    const today = new Date();
-    const dateStr = today.toISOString().split('T')[0];
+    const dateStr = getTodayString();
     
     // 创建下载元素
     const a = document.createElement('a');
@@ -652,7 +717,14 @@ function importNutritionData(event) {
         try {
             // 读取JSON数据
             const importedData = JSON.parse(e.target.result);
-            
+
+            // 校验数据结构：所有键必须以 nutrition-data- 开头，值必须是对象
+            const isValid = typeof importedData === 'object' && importedData !== null &&
+                Object.keys(importedData).every(key =>
+                    key.startsWith('nutrition-data-') && typeof importedData[key] === 'object'
+                );
+            if (!isValid) throw new Error('数据结构不符合预期');
+
             // 确认框
             if (confirm('导入将覆盖现有数据，确定要继续吗？')) {
                 // 导入所有数据

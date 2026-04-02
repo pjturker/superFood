@@ -185,14 +185,14 @@ input:focus {
     font-size: 1rem;
 }
 
-.breakfast-btn { background-color: #4CAF50; }
-.breakfast-btn:hover { background-color: #388E3C; }
+.breakfast-btn { background-color: #FF9800; }
+.breakfast-btn:hover { background-color: #F57C00; }
 
 .lunch-btn { background-color: #4CAF50; }
 .lunch-btn:hover { background-color: #388E3C; }
 
-.dinner-btn { background-color: #4CAF50; }
-.dinner-btn:hover { background-color: #388E3C; }
+.dinner-btn { background-color: #3F51B5; }
+.dinner-btn:hover { background-color: #303F9F; }
 
 .all-btn { background-color: #2196F3; }
 .all-btn:hover { background-color: #1976D2; }
@@ -227,25 +227,58 @@ input:focus {
     border-color: var(--primary-color);
 }
 
-.legend {
-    display: flex;
-    justify-content: center;
+/* 今日摄入概览卡片 */
+.summary-grid {
+    display: grid;
+    grid-template-columns: repeat(auto-fill, minmax(180px, 1fr));
     gap: 1rem;
-    margin-top: 0.5rem;
 }
 
-.legend-item {
+.summary-item {
     display: flex;
-    align-items: center;
-    gap: 0.3rem;
-    font-size: 0.8rem;
-    color: #666;
+    flex-direction: column;
+    gap: 0.4rem;
+    padding: 0.75rem 1rem;
+    border-radius: 8px;
+    background: var(--background-color);
+    border: 1px solid var(--border-color);
 }
 
-.legend-color {
-    width: 12px;
-    height: 12px;
-    border-radius: 3px;
+.summary-label {
+    font-size: 0.8rem;
+    color: #888;
+    font-weight: 500;
+}
+
+.summary-value {
+    font-size: 1.4rem;
+    font-weight: 700;
+    color: #333;
+}
+
+.summary-sub {
+    font-size: 0.75rem;
+    color: #aaa;
+}
+
+.progress-bar-wrap {
+    width: 100%;
+    height: 8px;
+    background: #e0e0e0;
+    border-radius: 4px;
+    overflow: hidden;
+}
+
+.progress-bar {
+    height: 100%;
+    border-radius: 4px;
+    width: 0%;
+    transition: width 0.4s ease, background-color 0.3s ease;
+    background-color: #4285f4;
+}
+
+.progress-bar.over-target {
+    background-color: #F44336;
 }
 
 .tabs {
